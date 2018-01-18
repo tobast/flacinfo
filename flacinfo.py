@@ -106,6 +106,7 @@ def edit_flac(args):
 
 def reverse_tag(vorbis_tag):
     """ Reverses a Vorbis tag to an argument name """
+    vorbis_tag = vorbis_tag.upper()
     for tag in VORBIS_ARG_NAME:
         if VORBIS_ARG_NAME[tag] == vorbis_tag:
             return tag
