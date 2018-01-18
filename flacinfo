@@ -37,7 +37,9 @@ class NoSuchTag(Exception):
 def argparser():
     """ Parses the arguments from sys.argv """
     parser = argparse.ArgumentParser(
-        description="Edit flac files' metadata")
+        description="Edit flac files' metadata",
+        epilog=('When no option modifying the tags is passed, the currently '
+                'set tags are shown.'))
     parser.add_argument('-a', '--artist',
                         help="Specify artist name")
     parser.add_argument('-c', '--comment',
