@@ -13,6 +13,18 @@ import os
 import sys
 
 
+VORBIS_ARG_NAME = {
+    'artist': 'ARTIST',
+    'comment': 'COMMENT',
+    'genre': 'GENRE',
+    'album': 'ALBUM',
+    'albumnumber': 'DISCNUMBER',
+    'track': 'TRACKNUMBER',
+    'title': 'TITLE',
+    'year': 'DATE',
+}
+
+
 def argparser():
     """ Parses the arguments from sys.argv """
     parser = argparse.ArgumentParser(
@@ -52,16 +64,6 @@ def isFlacFile(path):
 
 
 def makeMetaflacArgs(inArgs):
-    VORBIS_ARG_NAME = {
-        'artist': 'ARTIST',
-        'comment': 'COMMENT',
-        'genre': 'GENRE',
-        'album': 'ALBUM',
-        'albumnumber': 'DISCNUMBER',
-        'track': 'TRACKNUMBER',
-        'title': 'TITLE',
-        'year': 'DATE',
-    }
     outArgs = []
 
     for arg in inArgs:
