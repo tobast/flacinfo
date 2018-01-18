@@ -8,6 +8,9 @@ collection, but for flac files.
 """
 
 import argparse
+import subprocess
+import os
+import sys
 
 
 def argparser():
@@ -35,9 +38,70 @@ def argparser():
     return parser.parse_args()
 
 
+def isFlacFile(path):
+    """ Checks whether `path` refers to an existing, writeable flac file """
+    if not os.path.isfile(path) or not os.access(path, os.W_OK):
+        return False
+    flacRun = subprocess.run(['metaflac', '--list', path],
+                             stdout=subprocess.DEVNULL,
+                             stderr=subprocess.DEVNULL)
+    if flacRun.returncode != 0:
+        return False  # Metaflac failed to list the files' metadata
+
+    return True
+
+
+def makeMetaflacArgs(inArgs):
+    VORBIS_ARG_NAME = {
+        'artist': 'ARTIST',
+        'comment': 'COMMENT',
+        'genre': 'GENRE',
+        'album': 'ALBUM',
+        'albumnumber': 'DISCNUMBER',
+        'track': 'TRACKNUMBER',
+        'title': 'TITLE',
+        'year': 'DATE',
+    }
+    outArgs = []
+
+    for arg in inArgs:
+        argVal = inArgs[arg]
+        if arg not in VORBIS_ARG_NAME or argVal is None:
+            continue
+        argName = VORBIS_ARG_NAME[arg]
+
+        outArgs.append('--remove-tag={}'.format(argName))
+        outArgs.append("--set-tag='{}={}'".format(argName, argVal))
+
+    return outArgs
+
+
 def main():
     args = argparser()
-    print(args)
+
+    hasErrors = False
+    for cFile in args.file:
+        if not isFlacFile(cFile):
+            print(("Error: file {} does not exist, or is not writeable by "
+                   "metaflac").format(cFile),
+                  file=sys.stderr)
+            hasErrors = True
+    if hasErrors:
+        print("One or more file cannot be manipulated. Aborting.",
+              file=sys.stderr)
+        sys.exit(1)
+
+    metaflacArgs = makeMetaflacArgs(vars(args))
+    metaflacArgs += args.file
+    metaflacArgs.insert(0, 'metaflac')
+    metaflacRun = subprocess.run(metaflacArgs)
+
+    if metaflacRun.returncode != 0:
+        print(('\n\nMetaflac exited with return code {}. There was an error '
+               'during the execution, you should look at the output to '
+               'investigate it.').format(metaflacRun.returncode),
+              file=sys.stderr)
+        sys.exit(metaflacRun.returncode)
 
 
 if __name__ == '__main__':
