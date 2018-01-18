@@ -92,7 +92,7 @@ def makeMetaflacArgs(inArgs):
 def editFlac(args):
     """ Perfoms the requested edition operations """
     metaflacArgs = makeMetaflacArgs(args)
-    metaflacArgs += args.file
+    metaflacArgs += args['file']
     metaflacArgs.insert(0, 'metaflac')
     metaflacRun = subprocess.run(metaflacArgs)
 
