@@ -61,115 +61,115 @@ def argparser():
     return parser.parse_args()
 
 
-def isFlacFile(path):
+def is_flac_file(path):
     """ Checks whether `path` refers to an existing, writeable flac file """
     if not os.path.isfile(path) or not os.access(path, os.W_OK):
         return False
-    flacRun = subprocess.run(['metaflac', '--list', path],
-                             stdout=subprocess.DEVNULL,
-                             stderr=subprocess.DEVNULL)
-    if flacRun.returncode != 0:
+    flac_run = subprocess.run(['metaflac', '--list', path],
+                              stdout=subprocess.DEVNULL,
+                              stderr=subprocess.DEVNULL)
+    if flac_run.returncode != 0:
         return False  # Metaflac failed to list the files' metadata
 
     return True
 
 
-def makeMetaflacArgs(inArgs):
-    outArgs = []
+def make_metaflac_args(in_args):
+    out_args = []
 
-    for arg in inArgs:
-        argVal = inArgs[arg]
-        if arg not in VORBIS_ARG_NAME or argVal is None:
+    for arg in in_args:
+        arg_val = in_args[arg]
+        if arg not in VORBIS_ARG_NAME or arg_val is None:
             continue
-        argName = VORBIS_ARG_NAME[arg]
+        arg_name = VORBIS_ARG_NAME[arg]
 
-        outArgs.append('--remove-tag={}'.format(argName))
-        outArgs.append("--set-tag={}={}".format(argName, argVal))
+        out_args.append('--remove-tag={}'.format(arg_name))
+        out_args.append("--set-tag={}={}".format(arg_name, arg_val))
 
-    return outArgs
+    return out_args
 
 
-def editFlac(args):
+def edit_flac(args):
     """ Perfoms the requested edition operations """
-    metaflacArgs = makeMetaflacArgs(args)
-    metaflacArgs += args['file']
-    metaflacArgs.insert(0, 'metaflac')
-    metaflacRun = subprocess.run(metaflacArgs)
+    metaflac_args = make_metaflac_args(args)
+    metaflac_args += args['file']
+    metaflac_args.insert(0, 'metaflac')
+    metaflac_run = subprocess.run(metaflac_args)
 
-    if metaflacRun.returncode != 0:
+    if metaflac_run.returncode != 0:
         print(('\n\nMetaflac exited with return code {}. There was an error '
                'during the execution, you should look at the output to '
-               'investigate it.').format(metaflacRun.returncode),
+               'investigate it.').format(metaflac_run.returncode),
               file=sys.stderr)
-        sys.exit(metaflacRun.returncode)
+        sys.exit(metaflac_run.returncode)
 
 
-def reverseTag(vorbisTag):
+def reverse_tag(vorbis_tag):
     """ Reverses a Vorbis tag to an argument name """
     for tag in VORBIS_ARG_NAME:
-        if VORBIS_ARG_NAME[tag] == vorbisTag:
+        if VORBIS_ARG_NAME[tag] == vorbis_tag:
             return tag
-    raise NoSuchTag(vorbisTag)
+    raise NoSuchTag(vorbis_tag)
 
 
-def getTags(path):
+def get_tags(path):
     """ Retrieves the relevant tags for a single file """
-    metaflacArgs = ['metaflac']
+    metaflac_args = ['metaflac']
     for tag in VORBIS_ARG_NAME:
-        metaflacArgs += ['--show-tag', VORBIS_ARG_NAME[tag]]
-    metaflacArgs.append(path)
+        metaflac_args += ['--show-tag', VORBIS_ARG_NAME[tag]]
+    metaflac_args.append(path)
 
-    metaflacRun = subprocess.run(metaflacArgs, stdout=subprocess.PIPE)
-    metaOut = metaflacRun.stdout.decode('utf-8')
+    metaflac_run = subprocess.run(metaflac_args, stdout=subprocess.PIPE)
+    meta_out = metaflac_run.stdout.decode('utf-8')
     output = {}
 
-    for line in metaOut.split('\n'):
+    for line in meta_out.split('\n'):
         split = line.split('=')
         tag, value = split[0], '='.join(split[1:])
         if not tag:
             continue
-        tag = reverseTag(tag)
+        tag = reverse_tag(tag)
         output[tag] = value
     return output
 
 
-def showTags(path):
+def show_tags(path):
     """ Shows the relevant tags already present in the given flac file """
-    tags = getTags(path)
+    tags = get_tags(path)
     print("File: {}".format(path))
 
-    maxLen = max([len(tag) for tag in tags])
+    max_len = max([len(tag) for tag in tags])
     for tag in tags:
-        print(' {}: {}{}'.format(tag, ' '*(maxLen - len(tag)), tags[tag]))
+        print(' {}: {}{}'.format(tag, ' '*(max_len - len(tag)), tags[tag]))
     print("")
 
 
 def main():
     args = vars(argparser())
 
-    hasErrors = False
-    for cFile in args['file']:
-        if not isFlacFile(cFile):
+    has_errors = False
+    for cur_file in args['file']:
+        if not is_flac_file(cur_file):
             print(("Error: file {} does not exist, or is not writeable by "
-                   "metaflac").format(cFile),
+                   "metaflac").format(cur_file),
                   file=sys.stderr)
-            hasErrors = True
-    if hasErrors:
+            has_errors = True
+    if has_errors:
         print("One or more file cannot be manipulated. Aborting.",
               file=sys.stderr)
         sys.exit(1)
 
-    editMode = False
+    edit_mode = False
     for tag in VORBIS_ARG_NAME:
         if args[tag] is not None:
-            editMode = True
+            edit_mode = True
             break
 
-    if editMode:
-        editFlac(args)
+    if edit_mode:
+        edit_flac(args)
     else:
         for path in args['file']:
-            showTags(path)
+            show_tags(path)
 
 
 if __name__ == '__main__':
