@@ -2,6 +2,12 @@
 
 A script analoguous to `mp3info`, but for flac files.
 
+## Requirements
+
+`flacinfo` depends on the presence of a
+[`metaflac`](https://linux.die.net/man/1/metaflac) binary somewhere in your
+`$PATH`.
+
 ## Usage
 
 ```
