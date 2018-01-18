@@ -71,7 +71,7 @@ def makeMetaflacArgs(inArgs):
         argName = VORBIS_ARG_NAME[arg]
 
         outArgs.append('--remove-tag={}'.format(argName))
-        outArgs.append("--set-tag='{}={}'".format(argName, argVal))
+        outArgs.append("--set-tag={}={}".format(argName, argVal))
 
     return outArgs
 
