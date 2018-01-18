@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+
+"""
+flacinfo
+
+A script analoguous to `mp3info`, allowing one to easily tag their music
+collection, but for flac files.
+"""
+
+import argparse
+
+
+def argparser():
+    """ Parses the arguments from sys.argv """
+    parser = argparse.ArgumentParser(
+        description="Edit flac files' metadata")
+    parser.add_argument('-a', '--artist',
+                        help="Specify artist name")
+    parser.add_argument('-c', '--comment',
+                        help="Specify an arbitrary comment")
+    parser.add_argument('-g', '--genre',
+                        help="Specify genre (in plain text)")
+    parser.add_argument('-l', '--album',
+                        help="Specify album name")
+    parser.add_argument('-m', '--albumnumber',
+                        help="Specify album number")
+    parser.add_argument('-n', '--track',
+                        help="Specify track number")
+    parser.add_argument('-t', '--title',
+                        help="Specify track title")
+    parser.add_argument('-y', '--year',
+                        help="Specify album year")
+    parser.add_argument('file', nargs='+', metavar='FILE',
+                        help="The file(s) to work on")
+    return parser.parse_args()
+
+
+def main():
+    args = argparser()
+    print(args)
+
+
+if __name__ == '__main__':
+    main()
